@@ -14,12 +14,16 @@
             android:name=".MainActivity"
             android:title=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
         </activity>
-        <activity android:name=".LibraryActivity"></activity>
+        <activity
+            android:name=".Library.LibraryActivity"
+            android:label="@string/title_activity_library"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

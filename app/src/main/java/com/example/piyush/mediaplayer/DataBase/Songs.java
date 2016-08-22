@@ -7,13 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.util.Log;
 
-import com.example.piyush.mediaplayer.DataBase.Columns;
-import com.example.piyush.mediaplayer.DataBase.DBOpener;
-import com.example.piyush.mediaplayer.DataBase.SongsTable;
 import com.example.piyush.mediaplayer.Metadata.Metadata;
 import com.example.piyush.mediaplayer.Model.Song;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Created by Piyush on 08-08-2016.
@@ -21,10 +19,11 @@ import java.io.File;
 public class Songs {
 
     private static final String TAG = "Songs";
+    public static ArrayList<Song> songs;
+    private static SQLiteDatabase songsDb;
 
     // scan songs from the memory and store their list in a database.
 
-    private static SQLiteDatabase songsDb;
 
     // scans the storage for mp3 files
     private static void findMP3(File currFile) {
@@ -57,14 +56,29 @@ public class Songs {
         songsDb.insert(SongsTable.TABLE_NAME, null, values);
     }
 
-    // opens db and calls findmp3
+    // opens db and calls findMP3
     public static void loadSongsIntoDb(Context context) {
-        Log.d(TAG, "loadSongsIntoDb: called");
         songsDb = DBOpener.openWritableDataBase(context);
-        findMP3(Environment.getExternalStorageDirectory());
+        if (isDbEmpty(songsDb)) {
+            Log.d(TAG, "loadSongsIntoDb: creating new db");
+            findMP3(Environment.getExternalStorageDirectory());
+        } else {
+            Log.d(TAG, "loadSongsIntoDb: db already exists");
+            songsDb.close();
+            return;
+        }
     }
 
-//    public static void logAll(Context context) {
+
+    private static boolean isDbEmpty(SQLiteDatabase songsDb) {
+        Cursor c = songsDb.rawQuery("SELECT * FROM " + SongsTable.TABLE_NAME, null);
+        if (c.moveToFirst()) {
+            return false;
+        }
+        return true;
+    }
+
+    //    public static void logAll(Context context) {
 //        Log.d(TAG, "logAll: called");
 //        songsDb = DBOpener.openReadableDataBase(context);
 //        Cursor c = songsDb.query(SongsTable.TABLE_NAME,
@@ -82,4 +96,28 @@ public class Songs {
 //        }
 //    }
 
+    private static void putSongsInArrayList(Context context) {
+        Log.d(TAG, "putSongsInArrayList: ");
+        songs = new ArrayList<>();
+        songsDb = DBOpener.openReadableDataBase(context);
+        Cursor c = songsDb.query(SongsTable.TABLE_NAME, new String[]{Columns.ID, Columns.TITLE, Columns.PATH, Columns.ARTIST, Columns.ALBUM, Columns.ALBUM_ART_PATH, Columns.DURATION}, null, null, null, null, Columns.TITLE);
+        while (c.moveToNext()) {
+            Song s = new Song(
+                    c.getString(c.getColumnIndex(Columns.TITLE)),
+                    c.getString(c.getColumnIndex(Columns.ARTIST)),
+                    c.getString(c.getColumnIndex(Columns.ALBUM)),
+                    c.getString(c.getColumnIndex(Columns.DURATION)),
+                    c.getString(c.getColumnIndex(Columns.PATH)),
+                    c.getString(c.getColumnIndex(Columns.ALBUM_ART_PATH))
+            );
+            songs.add(s);
+        }
+        c.close();
+    }
+
+    public static ArrayList<Song> getSongs(Context context) {
+        Log.d(TAG, "getSongs: ");
+        putSongsInArrayList(context);
+        return songs;
+    }
 }

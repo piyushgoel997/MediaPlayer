@@ -2,6 +2,7 @@ package com.example.piyush.mediaplayer.Metadata;
 
 import android.media.MediaMetadataRetriever;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.piyush.mediaplayer.Model.Song;
@@ -19,13 +20,15 @@ public class Metadata {
     // retrieves metadata from a file and makes a new song using that metadata and returns it
     public static Song retrieveSongMetadata(String path) {
         MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
-        metadataRetriever.setDataSource(path);
-        Log.d(TAG, "retrieveSongMetadata: ");
+        try {
+            metadataRetriever.setDataSource(path);
+        } catch (RuntimeException re) {
+            Log.e(TAG, "retrieveSongMetadata: " + path, re);
+        }
         String albumArtPath = null;
         if (metadataRetriever.getEmbeddedPicture() != null) {
             albumArtPath = saveAlbumArt(metadataRetriever.getEmbeddedPicture(), metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) + "-" + metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
         }
-
         return new Song(
                 metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE),
                 metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST),
@@ -38,6 +41,7 @@ public class Metadata {
 
 
     // saves album art to AlbumArt folder and returns its path
+    @NonNull
     public static String saveAlbumArt(byte[] embeddedPicture, String fileName) {
         File aaFolder = new File(Environment.getExternalStorageDirectory().getPath().toString() + "/AlbumArt/");
         if (!aaFolder.exists()) {
