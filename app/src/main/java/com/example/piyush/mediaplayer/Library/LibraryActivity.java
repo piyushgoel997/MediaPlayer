@@ -1,5 +1,6 @@
 package com.example.piyush.mediaplayer.Library;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.piyush.mediaplayer.DataBase.Songs;
+import com.example.piyush.mediaplayer.MainActivity;
+import com.example.piyush.mediaplayer.MediaPlayback.Playback;
 import com.example.piyush.mediaplayer.Model.Song;
 import com.example.piyush.mediaplayer.R;
 
@@ -33,6 +36,11 @@ public class LibraryActivity extends AppCompatActivity {
         songsRecyclerView.setLayoutManager(layoutManager);
         songsRecyclerView.setAdapter(songRecyclerViewAdapter);
         songRecyclerViewAdapter.notifyDataSetChanged();
+    }
+
+    public void getCurrSong(View view) {
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
     }
 
     public class SongRecyclerViewHolder extends RecyclerView.ViewHolder {
@@ -63,29 +71,29 @@ public class LibraryActivity extends AppCompatActivity {
             View itemView = li.inflate(R.layout.rv_list_item, parent, false);
 
 
-            LibraryActivity.SongRecyclerViewHolder songRecyclerViewHolder = new SongRecyclerViewHolder(itemView);
+            final LibraryActivity.SongRecyclerViewHolder songRecyclerViewHolder = new SongRecyclerViewHolder(itemView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Playback.play(songs.get(songRecyclerViewHolder.getLayoutPosition()).getPath());
+                }
+            });
+
             return songRecyclerViewHolder;
         }
 
         @Override
         public void onBindViewHolder(SongRecyclerViewHolder holder, int position) {
             Song s = songs.get(position);
-            Log.d(TAG, "onBindViewHolder: "+s.getTitle());
             holder.album.setText(s.getAlbum());
             holder.title.setText(s.getTitle());
             holder.artist.setText(s.getArtist());
 
-            holder.album.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "onClick: album");
-                }
-            });
         }
 
         @Override
         public int getItemCount() {
-            Log.d(TAG, "getItemCount: " + songs.size());
             return songs.size();
         }
     }
