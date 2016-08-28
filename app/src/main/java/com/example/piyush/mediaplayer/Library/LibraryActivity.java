@@ -1,5 +1,6 @@
 package com.example.piyush.mediaplayer.Library;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ public class LibraryActivity extends AppCompatActivity {
 
 
     private static final String TAG = "LibAct";
+    private Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +78,7 @@ public class LibraryActivity extends AppCompatActivity {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Playback.play(songs.get(songRecyclerViewHolder.getLayoutPosition()).getPath());
+                    Playback.play(songs.get(songRecyclerViewHolder.getLayoutPosition()).getPath(),context);
                 }
             });
 

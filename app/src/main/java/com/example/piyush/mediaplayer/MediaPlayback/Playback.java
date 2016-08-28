@@ -9,6 +9,8 @@ import android.util.Log;
 import com.example.piyush.mediaplayer.DataBase.Columns;
 import com.example.piyush.mediaplayer.DataBase.DBOpener;
 import com.example.piyush.mediaplayer.DataBase.SongsTable;
+import com.example.piyush.mediaplayer.MainActivity;
+import com.example.piyush.mediaplayer.MediaPlayback.Queue.SongQueue;
 import com.example.piyush.mediaplayer.Model.Song;
 
 import java.io.IOException;
@@ -23,6 +25,12 @@ public class Playback {
     private static Song currSong;
     private static String currSongPath;
     private static SQLiteDatabase songsDb;
+
+    public static void play(String path, Context context) {
+        Log.d(TAG, "play: ");
+        play(path);
+        SongQueue.makeQueue(context);
+    }
 
     public static void play(String path) {
         currSongPath = path;
@@ -65,5 +73,26 @@ public class Playback {
         );
         return currSong;
     }
-    
+
+    public static void seekSong(int position, int maxPos) {
+        mediaPlayer.seekTo(((Integer.parseInt(currSong.getDuration()))*position)/maxPos);
+    }
+
+    public static void playNext() {
+        Song next = SongQueue.getNextSong();
+        Log.d(TAG, "playNext: " + next.getPath());
+        play(next.getPath());
+        currSong = next;
+        currSongPath = next.getPath();
+    }
+
+    public static void playPrev() {
+        Song prev = SongQueue.getPrevSong();
+        if (prev == null) {
+            return;
+        }
+        play(prev.getPath());
+        currSong = prev;
+        currSongPath = prev.getPath();
+    }
 }

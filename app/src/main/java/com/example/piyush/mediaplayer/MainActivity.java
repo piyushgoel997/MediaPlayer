@@ -17,8 +17,6 @@ import com.example.piyush.mediaplayer.Library.LibraryActivity;
 import com.example.piyush.mediaplayer.MediaPlayback.Playback;
 import com.example.piyush.mediaplayer.Model.Song;
 
-import java.net.URI;
-
 import pl.tajchert.nammu.Nammu;
 import pl.tajchert.nammu.PermissionCallback;
 
@@ -35,12 +33,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        Log.d(TAG, "onCreate: ");
+
+
         setContentView(R.layout.activity_main);
+
 
         songName = (TextView) findViewById(R.id.tvSongName);
         albumName = (TextView) findViewById(R.id.tvAlbumName);
         artistName = (TextView) findViewById(R.id.tvArtistName);
         albumArt = (ImageView) findViewById(R.id.ivAlbumArt);
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        prevBtn = (ImageView) findViewById(R.id.ivPrevBtn);
+        playPauseBtn = (ImageView) findViewById(R.id.ivPlayPauseBtn);
+        nextBtn = (ImageView) findViewById(R.id.ivNextBtn);
 
         Log.d(TAG, "onCreate: called");
 
@@ -60,6 +67,23 @@ public class MainActivity extends AppCompatActivity {
         Nammu.askForPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE,permissionCallback);
 
         refreshActivity();
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Playback.seekSong(progress,seekBar.getMax());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     public void loadSongs() {
@@ -68,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playPrevSong(View view) {
-
+        Playback.playPrev();
+        refreshActivity();
     }
 
     public void playPause(View view) {
@@ -76,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playNextSong(View view) {
+        Playback.playNext();
+        refreshActivity();
     }
 
     public void openLibraryActivity(View view) {
@@ -95,7 +122,10 @@ public class MainActivity extends AppCompatActivity {
         songName.setText(currentlyPlaying.getTitle());
         artistName.setText(currentlyPlaying.getArtist());
         albumName.setText(currentlyPlaying.getAlbum());
-        albumArt.setImageURI(Uri.parse(currentlyPlaying.getAlbumArtPath()));
+        Log.d(TAG, "refreshActivity: " + currentlyPlaying.getAlbumArtPath());
+        if (currentlyPlaying.getAlbumArtPath() != null) {
+            albumArt.setImageURI(Uri.parse(currentlyPlaying.getAlbumArtPath()));
+        }
     }
 
     @Override

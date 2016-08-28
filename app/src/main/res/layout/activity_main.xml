@@ -12,7 +12,7 @@
     <ImageView
         android:id="@+id/ivAlbumArt"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="400dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -47,28 +47,30 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="80dp" />
 
-    <!-- add media player controls below seek bar -->
-
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
         android:layout_height="match_parent"
         android:layout_below="@id/seekBar"
         android:orientation="horizontal"
         android:weightSum="3">
         <ImageView
             android:id="@+id/ivPrevBtn"
-            android:layout_width="match_parent"
+            android:src="@drawable/prev_button"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="playPrevSong"/>
         <ImageView
             android:id="@+id/ivPlayPauseBtn"
-            android:layout_width="match_parent"
+            android:src="@drawable/play_button"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="playPause"/>
         <ImageView
             android:id="@+id/ivNextBtn"
+            android:src="@drawable/next_button"
             android:onClick="playNextSong"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent" />
     </LinearLayout>
 
