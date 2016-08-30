@@ -1,6 +1,7 @@
 package com.example.piyush.mediaplayer;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.example.piyush.mediaplayer.DataBase.Songs;
 import com.example.piyush.mediaplayer.Library.LibraryActivity;
 import com.example.piyush.mediaplayer.MediaPlayback.Playback;
+import com.example.piyush.mediaplayer.MediaPlayback.PlaybackStates;
 import com.example.piyush.mediaplayer.Model.Song;
 
 import pl.tajchert.nammu.Nammu;
@@ -49,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         playPauseBtn = (ImageView) findViewById(R.id.ivPlayPauseBtn);
         nextBtn = (ImageView) findViewById(R.id.ivNextBtn);
 
-        Log.d(TAG, "onCreate: called");
 
         PermissionCallback permissionCallback = new PermissionCallback() {
             @Override
@@ -97,7 +98,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playPause(View view) {
-
+        Log.d(TAG, "playPause: "+Playback.getCurrentState());
+        if (Playback.getCurrentState().equals(PlaybackStates.PLAYING)) {
+            Playback.pause();
+        }else if (Playback.getCurrentState().equals(PlaybackStates.PAUSED)) {
+            Playback.resume();
+        }
+        refreshActivity();
     }
 
     public void playNextSong(View view) {
@@ -112,12 +119,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void refreshActivity() {
         Log.d(TAG, "refreshActivity: called");
-        if (Playback.getCurrentlyPlayingSong(this) == null) {
+        if (Playback.getCurrentSong(this) == null) {
             Log.d(TAG, "refreshActivity: no song playing");
             return;
         }
 
-        Song currentlyPlaying = Playback.getCurrentlyPlayingSong(this);
+        Song currentlyPlaying = Playback.getCurrentSong(this);
 
         songName.setText(currentlyPlaying.getTitle());
         artistName.setText(currentlyPlaying.getArtist());
@@ -125,6 +132,21 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "refreshActivity: " + currentlyPlaying.getAlbumArtPath());
         if (currentlyPlaying.getAlbumArtPath() != null) {
             albumArt.setImageURI(Uri.parse(currentlyPlaying.getAlbumArtPath()));
+        }
+
+        switch (Playback.getCurrentState()) {
+            case PlaybackStates.PLAYING:
+                playPauseBtn.setImageResource(R.drawable.pause_button);
+                break;
+            case PlaybackStates.PAUSED:
+                playPauseBtn.setImageResource(R.drawable.play_button);
+                break;
+            case PlaybackStates.STOPPED:
+                playPauseBtn.setImageResource(R.drawable.play_button);
+                break;
+            case PlaybackStates.NOT_STARTED:
+                playPauseBtn.setImageResource(R.drawable.play_button);
+                break;
         }
     }
 

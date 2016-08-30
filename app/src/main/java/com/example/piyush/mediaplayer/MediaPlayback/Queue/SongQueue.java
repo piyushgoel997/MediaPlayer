@@ -2,7 +2,6 @@ package com.example.piyush.mediaplayer.MediaPlayback.Queue;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.piyush.mediaplayer.DataBase.Songs;
 import com.example.piyush.mediaplayer.MediaPlayback.Playback;
@@ -27,7 +26,7 @@ public class SongQueue {
     public static void makeQueue(Context context) {
         Log.d(TAG, "makeQueue: ");
         songs = Songs.getSongs(context);
-        currSong = Playback.getCurrentlyPlayingSong(context);
+        currSong = Playback.getCurrentSong(context);
 
         nextSongs = new Stack<>();
         prevSongs = new Stack<>();

@@ -45,9 +45,14 @@ public class Metadata {
     public static String saveAlbumArt(byte[] embeddedPicture, String fileName) {
         File aaFolder = new File(Environment.getExternalStorageDirectory().getPath().toString() + "/AlbumArt/");
         if (!aaFolder.exists()) {
+            Log.d(TAG, "saveAlbumArt: folder doesn't exist");
             aaFolder.mkdir();
         }
         File file = new File(aaFolder, fileName);
+        if (file.exists()) {
+            Log.d(TAG, "saveAlbumArt: file exists");
+            return file.getPath();
+        }
         try {
             FileOutputStream fos = new FileOutputStream(file.getPath());
             fos.write(embeddedPicture,0,embeddedPicture.length);

@@ -9,7 +9,6 @@ import android.util.Log;
 import com.example.piyush.mediaplayer.DataBase.Columns;
 import com.example.piyush.mediaplayer.DataBase.DBOpener;
 import com.example.piyush.mediaplayer.DataBase.SongsTable;
-import com.example.piyush.mediaplayer.MainActivity;
 import com.example.piyush.mediaplayer.MediaPlayback.Queue.SongQueue;
 import com.example.piyush.mediaplayer.Model.Song;
 
@@ -18,13 +17,14 @@ import java.io.IOException;
 /**
  * Created by Piyush on 22-08-2016.
  */
-public class Playback {
+public class Playback extends PlaybackStates{
 
     private static final String TAG = "Playback";
     private static MediaPlayer mediaPlayer;
     private static Song currSong;
     private static String currSongPath;
     private static SQLiteDatabase songsDb;
+    private static String currentState = NOT_STARTED;
 
     public static void play(String path, Context context) {
         Log.d(TAG, "play: ");
@@ -32,7 +32,7 @@ public class Playback {
         SongQueue.makeQueue(context);
     }
 
-    public static void play(String path) {
+    private static void play(String path) {
         currSongPath = path;
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
@@ -45,15 +45,17 @@ public class Playback {
             mediaPlayer.setDataSource(path);
             mediaPlayer.prepare();
             mediaPlayer.start();
+            currentState = PLAYING;
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     // returns null if not playing
-    public static Song getCurrentlyPlayingSong(Context context) {
+    public static Song getCurrentSong(Context context) {
         songsDb = DBOpener.openReadableDataBase(context);
-        if (currSongPath == null) {
+        if (currentState == NOT_STARTED || currentState == STOPPED) {
+            Log.d(TAG, "getCurrentSong: null");
             return null;
         }
         Cursor c = songsDb.query(SongsTable.TABLE_NAME,
@@ -84,6 +86,7 @@ public class Playback {
         play(next.getPath());
         currSong = next;
         currSongPath = next.getPath();
+        currentState = PLAYING;
     }
 
     public static void playPrev() {
@@ -94,5 +97,20 @@ public class Playback {
         play(prev.getPath());
         currSong = prev;
         currSongPath = prev.getPath();
+        currentState = PLAYING;
+    }
+
+    public static String getCurrentState() {
+        return currentState;
+    }
+
+    public static void pause() {
+        mediaPlayer.pause();
+        currentState = PAUSED;
+    }
+
+    public static void resume() {
+        mediaPlayer.start();
+        currentState = PLAYING;
     }
 }

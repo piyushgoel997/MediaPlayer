@@ -88,9 +88,14 @@ public class LibraryActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(SongRecyclerViewHolder holder, int position) {
             Song s = songs.get(position);
-            holder.album.setText(s.getAlbum());
-            holder.title.setText(s.getTitle());
-            holder.artist.setText(s.getArtist());
+            if (s.getTitle() != null || s.getTitle() != "") {
+                holder.album.setText(s.getAlbum());
+                holder.title.setText(s.getTitle());
+                holder.artist.setText(s.getArtist());
+            } else {
+                Log.d(TAG, "onBindViewHolder: "+s.getPath());
+                holder.title.setText(s.getPath().substring(s.getPath().lastIndexOf("/")));
+            }
 
         }
 
