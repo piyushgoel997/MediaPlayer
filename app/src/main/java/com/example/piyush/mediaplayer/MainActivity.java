@@ -1,9 +1,9 @@
 package com.example.piyush.mediaplayer;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,10 +26,10 @@ import pl.tajchert.nammu.PermissionCallback;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    private TextView songName, artistName, albumName;
-    private SeekBar seekBar;
-    private ImageView albumArt;
-    private ImageView prevBtn, playPauseBtn, nextBtn;
+    private static TextView songName, artistName, albumName;
+    private static SeekBar seekBar;
+    private static ImageView albumArt;
+    private static ImageView prevBtn, playPauseBtn, nextBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "onCreate: ");
 
-
         setContentView(R.layout.activity_main);
-
 
         songName = (TextView) findViewById(R.id.tvSongName);
         albumName = (TextView) findViewById(R.id.tvAlbumName);
@@ -51,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         playPauseBtn = (ImageView) findViewById(R.id.ivPlayPauseBtn);
         nextBtn = (ImageView) findViewById(R.id.ivNextBtn);
 
+//        loadSongs();
 
         PermissionCallback permissionCallback = new PermissionCallback() {
             @Override
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Can't play music unless you let me scan your mobile's storage", Toast.LENGTH_SHORT).show();
             }
         };
-        
+
         Nammu.askForPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE,permissionCallback);
 
         refreshActivity();
@@ -72,7 +71,9 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Playback.seekSong(progress,seekBar.getMax());
+                if (fromUser) {
+                    Playback.seekSong(progress);
+                }
             }
 
             @Override
@@ -85,7 +86,26 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
+
+        seekBar.postDelayed(progressRunnable,10);
     }
+
+    public Runnable progressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (seekBar != null) {
+
+                if (Playback.getCurrentState() == PlaybackStates.PLAYING) {
+                    int currPos = Playback.getCurrentPosition();
+//                        Log.d(TAG, "updateSeekBar: " + currPos);
+                    seekBar.setProgress(currPos);
+                    seekBar.postDelayed(progressRunnable, 50);
+                }
+            }
+        }
+    };
 
     public void loadSongs() {
         Log.d(TAG, "loadSongs: ");
@@ -133,6 +153,12 @@ public class MainActivity extends AppCompatActivity {
         if (currentlyPlaying.getAlbumArtPath() != null) {
             albumArt.setImageURI(Uri.parse(currentlyPlaying.getAlbumArtPath()));
         }
+        if (seekBar.getMax() != Integer.parseInt(currentlyPlaying.getDuration())) {
+            seekBar.setMax(Integer.parseInt(currentlyPlaying.getDuration()));
+
+        }
+
+        Log.d(TAG, "refreshActivity: " + currentlyPlaying.getDuration());
 
         switch (Playback.getCurrentState()) {
             case PlaybackStates.PLAYING:
@@ -152,7 +178,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume: called");
         super.onResume();
         refreshActivity();
     }
+
+
 }

@@ -5,7 +5,7 @@ package com.example.piyush.mediaplayer.DataBase;
  */
 public class SongsTable extends DbStringHelper {
 
-    public static final String TABLE_NAME = "Songs";
+    public static final String TABLE_NAME = "SongS";
 
     public static final String TABLE_CREATE_COMMAND =
             CREATE

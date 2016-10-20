@@ -9,6 +9,7 @@ import android.util.Log;
 import com.example.piyush.mediaplayer.DataBase.Columns;
 import com.example.piyush.mediaplayer.DataBase.DBOpener;
 import com.example.piyush.mediaplayer.DataBase.SongsTable;
+import com.example.piyush.mediaplayer.Library.LibraryActivity;
 import com.example.piyush.mediaplayer.MediaPlayback.Queue.SongQueue;
 import com.example.piyush.mediaplayer.Model.Song;
 
@@ -25,6 +26,7 @@ public class Playback extends PlaybackStates{
     private static String currSongPath;
     private static SQLiteDatabase songsDb;
     private static String currentState = NOT_STARTED;
+    private static OnSongChangedListner mOnSongChangedListner;
 
     public static void play(String path, Context context) {
         Log.d(TAG, "play: ");
@@ -37,7 +39,7 @@ public class Playback extends PlaybackStates{
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
         }
-        if (mediaPlayer.isPlaying()) {
+        if (currentState == PLAYING || currentState == PAUSED) {
             mediaPlayer.reset();
         }
         try {
@@ -49,6 +51,13 @@ public class Playback extends PlaybackStates{
         } catch (IOException e) {
             e.printStackTrace();
         }
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                // play next song
+                playNext();
+            }
+        });
     }
 
     // returns null if not playing
@@ -76,8 +85,8 @@ public class Playback extends PlaybackStates{
         return currSong;
     }
 
-    public static void seekSong(int position, int maxPos) {
-        mediaPlayer.seekTo(((Integer.parseInt(currSong.getDuration()))*position)/maxPos);
+    public static void seekSong(int position) {
+        mediaPlayer.seekTo(position);
     }
 
     public static void playNext() {
@@ -87,6 +96,10 @@ public class Playback extends PlaybackStates{
         currSong = next;
         currSongPath = next.getPath();
         currentState = PLAYING;
+
+        if (mOnSongChangedListner != null) {
+            mOnSongChangedListner.onSongChanged();
+        }
     }
 
     public static void playPrev() {
@@ -98,6 +111,10 @@ public class Playback extends PlaybackStates{
         currSong = prev;
         currSongPath = prev.getPath();
         currentState = PLAYING;
+
+        if (mOnSongChangedListner != null) {
+            mOnSongChangedListner.onSongChanged();
+        }
     }
 
     public static String getCurrentState() {
@@ -112,5 +129,17 @@ public class Playback extends PlaybackStates{
     public static void resume() {
         mediaPlayer.start();
         currentState = PLAYING;
+    }
+
+    public static void setOnSongChangedListner(OnSongChangedListner onSongChangedListner) {
+        mOnSongChangedListner = onSongChangedListner;
+    }
+
+    public interface OnSongChangedListner {
+        void onSongChanged();
+    }
+
+    public static int getCurrentPosition() {
+        return mediaPlayer.getCurrentPosition();
     }
 }

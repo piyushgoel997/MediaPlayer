@@ -2,6 +2,7 @@ package com.example.piyush.mediaplayer.Library;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,13 +26,27 @@ public class LibraryActivity extends AppCompatActivity {
 
     private static final String TAG = "LibAct";
     private Context context = this;
+    private RecyclerView songsRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_library);
 
-        RecyclerView songsRecyclerView = (RecyclerView) findViewById(R.id.song_list_rv);
+        songsRecyclerView = (RecyclerView) findViewById(R.id.song_list_rv);
+        refreshList();
+
+        Playback.setOnSongChangedListner(new Playback.OnSongChangedListner() {
+            @Override
+            public void onSongChanged() {
+                Log.d(TAG, "onSongChanged: called");
+                refreshList();
+            }
+        });
+    }
+
+    public void refreshList() {
+        Log.d(TAG, "refreshList: called");
         ArrayList<Song> songs = Songs.getSongs(this);
         SongRecyclerViewAdapter songRecyclerViewAdapter = new SongRecyclerViewAdapter(songs);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -41,6 +56,7 @@ public class LibraryActivity extends AppCompatActivity {
     }
 
     public void getCurrSong(View view) {
+        Log.d(TAG, "getCurrSong: new button");
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
     }
@@ -88,13 +104,21 @@ public class LibraryActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(SongRecyclerViewHolder holder, int position) {
             Song s = songs.get(position);
-            if (s.getTitle() != null || s.getTitle() != "") {
+            if (s.getTitle() != null && s.getTitle() != "") {
                 holder.album.setText(s.getAlbum());
                 holder.title.setText(s.getTitle());
                 holder.artist.setText(s.getArtist());
             } else {
                 Log.d(TAG, "onBindViewHolder: "+s.getPath());
                 holder.title.setText(s.getPath().substring(s.getPath().lastIndexOf("/")));
+//                holder.title.setText(s.getPath());
+            }
+            if (Playback.getCurrentState() != Playback.NOT_STARTED && Playback.getCurrentState() !=Playback.STOPPED) {
+                if (s.getTitle() == Playback.getCurrentSong(context).getTitle() && s.getArtist() == Playback.getCurrentSong(context).getArtist()) {
+                    holder.album.setTextColor(getColor(R.color.colorAccent));
+                    holder.title.setTextColor(getColor(R.color.colorAccent));
+                    holder.artist.setTextColor(getColor(R.color.colorAccent));
+                }
             }
 
         }
@@ -105,5 +129,3 @@ public class LibraryActivity extends AppCompatActivity {
         }
     }
 }
-
-

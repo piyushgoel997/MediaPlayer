@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Environment;
 import android.util.Log;
 
@@ -62,6 +63,8 @@ public class Songs {
         if (isDbEmpty(songsDb)) {
             Log.d(TAG, "loadSongsIntoDb: creating new db");
             findMP3(Environment.getExternalStorageDirectory());
+            songsDb.close();
+            return;
         } else {
             Log.d(TAG, "loadSongsIntoDb: db already exists");
             songsDb.close();
@@ -71,9 +74,15 @@ public class Songs {
 
 
     private static boolean isDbEmpty(SQLiteDatabase songsDb) {
-        Cursor c = songsDb.rawQuery("SELECT * FROM " + SongsTable.TABLE_NAME, null);
-        if (c.moveToFirst()) {
-            return false;
+        try {
+            Cursor c = songsDb.rawQuery("SELECT * FROM " + SongsTable.TABLE_NAME, null);
+            if (c.moveToFirst()) {
+                Log.d(TAG, "isDbEmpty: not empty");
+                return false;
+            }
+        } catch (SQLiteException e) {
+            Log.d(TAG, "isDbEmpty: doesn't exist");
+            return true;
         }
         return true;
     }

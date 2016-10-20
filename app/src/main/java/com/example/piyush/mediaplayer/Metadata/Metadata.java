@@ -9,6 +9,7 @@ import com.example.piyush.mediaplayer.Model.Song;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by Piyush on 15-08-2016.
@@ -18,12 +19,12 @@ public class Metadata {
     private static final String TAG = "Metadata";
 
     // retrieves metadata from a file and makes a new song using that metadata and returns it
-    public static Song retrieveSongMetadata(String path) {
+    public static Song retrieveSongMetadata(String songFilePath) {
         MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
         try {
-            metadataRetriever.setDataSource(path);
+            metadataRetriever.setDataSource(songFilePath);
         } catch (RuntimeException re) {
-            Log.e(TAG, "retrieveSongMetadata: " + path, re);
+            Log.e(TAG, "retrieveSongMetadata: " + songFilePath, re);
         }
         String albumArtPath = null;
         if (metadataRetriever.getEmbeddedPicture() != null) {
@@ -34,7 +35,7 @@ public class Metadata {
                 metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST),
                 metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM),
                 metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION),
-                path,
+                songFilePath,
                 albumArtPath
         );
     }
@@ -43,10 +44,11 @@ public class Metadata {
     // saves album art to AlbumArt folder and returns its path
     @NonNull
     public static String saveAlbumArt(byte[] embeddedPicture, String fileName) {
-        File aaFolder = new File(Environment.getExternalStorageDirectory().getPath().toString() + "/AlbumArt/");
+        File aaFolder = new File(Environment.getExternalStorageDirectory().getPath().toString() + "/albumart/");
         if (!aaFolder.exists()) {
-            Log.d(TAG, "saveAlbumArt: folder doesn't exist");
-            aaFolder.mkdir();
+//            Log.d(TAG, "saveAlbumArt: folder doesn't exist");
+            boolean x= aaFolder.mkdirs();
+            Log.d(TAG, "saveAlbumArt: "+x);
         }
         File file = new File(aaFolder, fileName);
         if (file.exists()) {
