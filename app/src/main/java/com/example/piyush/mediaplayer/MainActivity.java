@@ -1,6 +1,7 @@
 package com.example.piyush.mediaplayer;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadSongs() {
         Log.d(TAG, "loadSongs: ");
-        Songs.loadSongsIntoDb(this);
+        Songs.loadSongsIntoDb(this.getApplicationContext());
     }
 
     public void playPrevSong(View view) {
@@ -139,12 +140,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void refreshActivity() {
         Log.d(TAG, "refreshActivity: called");
-        if (Playback.getCurrentSong(this) == null) {
+        if (Playback.getCurrentSong(this.getApplicationContext()) == null) {
             Log.d(TAG, "refreshActivity: no song playing");
             return;
         }
 
-        Song currentlyPlaying = Playback.getCurrentSong(this);
+        Song currentlyPlaying = Playback.getCurrentSong(this.getApplicationContext());
 
         songName.setText(currentlyPlaying.getTitle());
         artistName.setText(currentlyPlaying.getArtist());
@@ -175,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
 
     @Override
     protected void onResume() {

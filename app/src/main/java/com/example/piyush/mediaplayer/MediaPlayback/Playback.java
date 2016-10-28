@@ -9,7 +9,6 @@ import android.util.Log;
 import com.example.piyush.mediaplayer.DataBase.Columns;
 import com.example.piyush.mediaplayer.DataBase.DBOpener;
 import com.example.piyush.mediaplayer.DataBase.SongsTable;
-import com.example.piyush.mediaplayer.Library.LibraryActivity;
 import com.example.piyush.mediaplayer.MediaPlayback.Queue.SongQueue;
 import com.example.piyush.mediaplayer.Model.Song;
 
@@ -26,7 +25,8 @@ public class Playback extends PlaybackStates{
     private static String currSongPath;
     private static SQLiteDatabase songsDb;
     private static String currentState = NOT_STARTED;
-    private static OnSongChangedListner mOnSongChangedListner;
+    private static OnSongChangedListener mOnSongChangedListener;
+    private static OnPlayPauseListener mOnPlayPauseListener;
 
     public static void play(String path, Context context) {
         Log.d(TAG, "play: ");
@@ -58,6 +58,9 @@ public class Playback extends PlaybackStates{
                 playNext();
             }
         });
+        if (mOnPlayPauseListener != null) {
+            mOnPlayPauseListener.onPlayPause();
+        }
     }
 
     // returns null if not playing
@@ -97,8 +100,8 @@ public class Playback extends PlaybackStates{
         currSongPath = next.getPath();
         currentState = PLAYING;
 
-        if (mOnSongChangedListner != null) {
-            mOnSongChangedListner.onSongChanged();
+        if (mOnSongChangedListener != null) {
+            mOnSongChangedListener.onSongChanged();
         }
     }
 
@@ -112,8 +115,8 @@ public class Playback extends PlaybackStates{
         currSongPath = prev.getPath();
         currentState = PLAYING;
 
-        if (mOnSongChangedListner != null) {
-            mOnSongChangedListner.onSongChanged();
+        if (mOnSongChangedListener != null) {
+            mOnSongChangedListener.onSongChanged();
         }
     }
 
@@ -124,6 +127,9 @@ public class Playback extends PlaybackStates{
     public static void pause() {
         mediaPlayer.pause();
         currentState = PAUSED;
+        if (mOnPlayPauseListener != null) {
+            mOnPlayPauseListener.onPlayPause();
+        }
     }
 
     public static void resume() {
@@ -131,15 +137,24 @@ public class Playback extends PlaybackStates{
         currentState = PLAYING;
     }
 
-    public static void setOnSongChangedListner(OnSongChangedListner onSongChangedListner) {
-        mOnSongChangedListner = onSongChangedListner;
+    public static void setOnSongChangedListener(OnSongChangedListener onSongChangedListener) {
+        mOnSongChangedListener = onSongChangedListener;
     }
 
-    public interface OnSongChangedListner {
+    public interface OnSongChangedListener {
         void onSongChanged();
     }
 
     public static int getCurrentPosition() {
         return mediaPlayer.getCurrentPosition();
+    }
+
+    public static void setOnPlayPauseListener(OnPlayPauseListener mOnPlayPauseListener) {
+        Playback.mOnPlayPauseListener = mOnPlayPauseListener;
+    }
+
+    // called in play() and pause()
+    public interface OnPlayPauseListener {
+        void onPlayPause();
     }
 }

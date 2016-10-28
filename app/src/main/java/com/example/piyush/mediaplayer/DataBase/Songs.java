@@ -27,19 +27,19 @@ public class Songs {
 
 
     // scans the storage for mp3 files
-    private static void findMP3(File currFile) {
+    private static void findMP3(File currFile, Context context) {
         File[] childFiles = currFile.listFiles();
         if (childFiles == null || childFiles.length == 0) {
             return;
         }
         for (File child : childFiles) {
             if (!child.isFile()) {
-                findMP3(child);
+                findMP3(child, context);
             } else if (child.isFile()) {
                 // if child has last 4 letters as .mp3 then add that file to database
                 String path = child.getPath().toString();
                 if (path.endsWith(".mp3") || path.endsWith(".MP4") || path.endsWith(".flac") || path.endsWith(".FLAC")) {
-                    putInDb(Metadata.retrieveSongMetadata(path));
+                    putInDb(Metadata.retrieveSongMetadata(path, context));
                 }
             }
         }
@@ -62,7 +62,7 @@ public class Songs {
         songsDb = DBOpener.openWritableDataBase(context);
         if (isDbEmpty(songsDb)) {
             Log.d(TAG, "loadSongsIntoDb: creating new db");
-            findMP3(Environment.getExternalStorageDirectory());
+            findMP3(Environment.getExternalStorageDirectory(),context);
             songsDb.close();
             return;
         } else {

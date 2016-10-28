@@ -1,5 +1,6 @@
 package com.example.piyush.mediaplayer.Metadata;
 
+import android.content.Context;
 import android.media.MediaMetadataRetriever;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -19,7 +20,7 @@ public class Metadata {
     private static final String TAG = "Metadata";
 
     // retrieves metadata from a file and makes a new song using that metadata and returns it
-    public static Song retrieveSongMetadata(String songFilePath) {
+    public static Song retrieveSongMetadata(String songFilePath ,Context context) {
         MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
         try {
             metadataRetriever.setDataSource(songFilePath);
@@ -28,7 +29,7 @@ public class Metadata {
         }
         String albumArtPath = null;
         if (metadataRetriever.getEmbeddedPicture() != null) {
-            albumArtPath = saveAlbumArt(metadataRetriever.getEmbeddedPicture(), metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) + "-" + metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+            albumArtPath = saveAlbumArt(metadataRetriever.getEmbeddedPicture(), metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) + " " + metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST), context);
         }
         return new Song(
                 metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE),
@@ -43,14 +44,18 @@ public class Metadata {
 
     // saves album art to AlbumArt folder and returns its path
     @NonNull
-    public static String saveAlbumArt(byte[] embeddedPicture, String fileName) {
-        File aaFolder = new File(Environment.getExternalStorageDirectory().getPath().toString() + "/albumart/");
-        if (!aaFolder.exists()) {
-//            Log.d(TAG, "saveAlbumArt: folder doesn't exist");
-            boolean x= aaFolder.mkdirs();
-            Log.d(TAG, "saveAlbumArt: "+x);
-        }
-        File file = new File(aaFolder, fileName);
+    public static String saveAlbumArt(byte[] embeddedPicture, String fileName, Context context) {
+//        File aaFolder = new File(Environment.getExternalStorageDirectory().getPath().toString() + "/albumart/");
+//        if (!aaFolder.exists()) {
+////            Log.d(TAG, "saveAlbumArt: folder doesn't exist");
+//            boolean x= aaFolder.mkdirs();
+//            Log.d(TAG, "saveAlbumArt: "+x);
+//        }
+//        File file = new File(aaFolder, fileName);
+
+        File file = new File(context.getFilesDir(),fileName);
+        Log.d(TAG, "saveAlbumArt: called "+fileName);
+
         if (file.exists()) {
             Log.d(TAG, "saveAlbumArt: file exists");
             return file.getPath();
